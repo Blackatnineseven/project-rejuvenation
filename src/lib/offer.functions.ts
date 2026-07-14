@@ -167,9 +167,11 @@ export const analyzeOffer = createServerFn({ method: "POST" })
 Gere legendas em português do Brasil no tom ${toneMap[data.tone]} para o produto abaixo.
 Cada rede social tem regras diferentes — RESPEITE:
 
-- WhatsApp: mensagem para grupo, MUITO chamativa, usa muitos emojis, quebras de linha, formatação com *negrito* do WhatsApp (asteriscos simples), CTA forte, link no fim. Máx 700 caracteres. SEM hashtags.
-- Instagram: legenda de feed, storytelling curto, benefícios, emojis moderados, CTA, coloque "Link na bio 👆" ou o link direto se possível. Máx 900 caracteres. SEM hashtags no corpo (elas vão separadas).
-- Facebook: mais explicativa, tom conversacional, benefícios claros, CTA no fim com o link. Máx 900 caracteres. SEM hashtags.
+- WhatsApp: mensagem CURTA para grupo, direto ao ponto. Estrutura: 1 linha de gancho com emoji + nome do produto em *negrito* + preço + 1 linha de CTA + link. Máx 350 caracteres, no máximo 6 linhas. SEM hashtags. SEM enrolação, SEM descrição longa de benefícios.
+- Instagram: legenda de feed curta, 1 gancho + 2-3 linhas de benefício + CTA. Máx 400 caracteres. SEM hashtags no corpo.
+- Facebook: curta e direta, gancho + benefício principal + CTA com link. Máx 400 caracteres. SEM hashtags.
+
+Regra geral: seja OBJETIVO. Legendas longas performam pior em grupo de WhatsApp — as pessoas rolam.
 
 Produto: ${product.title}
 ${product.price ? `Preço: ${product.price}` : ""}
