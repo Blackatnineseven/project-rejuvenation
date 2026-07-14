@@ -282,6 +282,114 @@ function ResultView({ result }: { result: OfferResult }) {
         label="Roteiro Reels/Shorts"
         text={result.captions.script}
       />
+      <OfferCardGenerator result={result} />
+    </div>
+  );
+}
+
+function OfferCardGenerator({ result }: { result: OfferResult }) {
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [badge, setBadge] = useState("OFERTA");
+
+  async function generate() {
+    setLoading(true);
+    try {
+      const url = await renderOfferCard({
+        title: result.product.title,
+        price: result.product.price,
+        image: result.product.image,
+        platformLabel: result.platformLabel,
+        badge,
+      });
+      setDataUrl(url);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao gerar card");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function download() {
+    if (!dataUrl) return;
+    const a = document.createElement("a");
+    a.href = dataUrl;
+    a.download = `oferta-${Date.now()}.png`;
+    a.click();
+    toast.success("Card baixado");
+  }
+
+  return (
+    <div className="card-glass rounded-2xl p-5">
+      <div className="flex items-center gap-2 font-semibold text-sm mb-3">
+        <ImageIcon className="h-4 w-4 text-primary" />
+        Card para Instagram / Facebook (1080x1350)
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-4">
+        {["OFERTA", "PROMO", "IMPERDÍVEL", "-30%", "-50%", "OFF"].map((b) => (
+          <button
+            key={b}
+            type="button"
+            onClick={() => setBadge(b)}
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition ${
+              badge === b
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary text-secondary-foreground hover:bg-muted"
+            }`}
+          >
+            {b}
+          </button>
+        ))}
+        <input
+          value={badge}
+          onChange={(e) => setBadge(e.target.value.slice(0, 14))}
+          placeholder="Personalizar…"
+          className="px-3 py-1.5 rounded-md text-xs bg-secondary border border-border w-32"
+        />
+      </div>
+
+      {dataUrl ? (
+        <div className="space-y-3">
+          <img
+            src={dataUrl}
+            alt="Card da oferta"
+            className="w-full max-w-sm mx-auto rounded-lg border border-border"
+          />
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={download}
+              className="btn-hero px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" /> Baixar PNG
+            </button>
+            <button
+              onClick={generate}
+              disabled={loading}
+              className="px-4 py-2 rounded-lg text-sm bg-secondary hover:bg-muted flex items-center gap-2"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              Gerar novamente
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={generate}
+          disabled={loading}
+          className="btn-hero px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" /> Gerando…
+            </>
+          ) : (
+            <>
+              <ImageIcon className="h-4 w-4" /> Gerar card da oferta
+            </>
+          )}
+        </button>
+      )}
     </div>
   );
 }
