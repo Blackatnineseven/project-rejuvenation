@@ -13,8 +13,11 @@ import {
   Facebook,
   ExternalLink,
   AlertTriangle,
+  Download,
+  Image as ImageIcon,
 } from "lucide-react";
 import { analyzeOffer, type OfferResult } from "@/lib/offer.functions";
+import { renderOfferCard } from "@/lib/offer-card";
 import type { AffiliateIds } from "@/lib/affiliate";
 
 export const Route = createFileRoute("/")({
