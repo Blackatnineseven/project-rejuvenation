@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   Download,
   Image as ImageIcon,
+  ListChecks,
 } from "lucide-react";
 import { analyzeOffer, type OfferResult } from "@/lib/offer.functions";
 import { renderOfferCard } from "@/lib/offer-card";
@@ -97,13 +98,22 @@ function Index() {
           </div>
           <span className="text-lg font-bold">AchouAI</span>
         </div>
-        <button
-          onClick={() => setSettingsOpen(true)}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary hover:bg-muted text-sm"
-        >
-          <Settings className="h-4 w-4" />
-          IDs de afiliado
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/fila"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary hover:bg-muted text-sm"
+          >
+            <ListChecks className="h-4 w-4" />
+            Fila do dia
+          </Link>
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary hover:bg-muted text-sm"
+          >
+            <Settings className="h-4 w-4" />
+            <span className="hidden sm:inline">IDs de afiliado</span>
+          </button>
+        </div>
       </header>
 
       <section className="mx-auto max-w-4xl px-6 pt-6 pb-8 text-center">
