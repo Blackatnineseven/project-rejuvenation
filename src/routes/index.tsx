@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   Download,
   Image as ImageIcon,
+  ListChecks,
 } from "lucide-react";
 import { analyzeOffer, type OfferResult } from "@/lib/offer.functions";
 import { renderOfferCard } from "@/lib/offer-card";
