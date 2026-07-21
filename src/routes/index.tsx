@@ -16,9 +16,14 @@ import {
   Download,
   Image as ImageIcon,
   ListChecks,
+  Video,
+  Upload,
+  Search,
 } from "lucide-react";
 import { analyzeOffer, type OfferResult } from "@/lib/offer.functions";
 import { renderOfferCard } from "@/lib/offer-card";
+import { renderOfferReel } from "@/lib/offer-reel";
+import { findFallbackImage } from "@/lib/image-fallback.functions";
 import type { AffiliateIds } from "@/lib/affiliate";
 
 export const Route = createFileRoute("/")({
