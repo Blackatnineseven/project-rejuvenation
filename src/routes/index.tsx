@@ -16,9 +16,14 @@ import {
   Download,
   Image as ImageIcon,
   ListChecks,
+  Video,
+  Upload,
+  Search,
 } from "lucide-react";
 import { analyzeOffer, type OfferResult } from "@/lib/offer.functions";
 import { renderOfferCard } from "@/lib/offer-card";
+import { renderOfferReel } from "@/lib/offer-reel";
+import { findFallbackImage } from "@/lib/image-fallback.functions";
 import type { AffiliateIds } from "@/lib/affiliate";
 
 export const Route = createFileRoute("/")({
@@ -214,18 +219,63 @@ function Index() {
 }
 
 function ResultView({ result }: { result: OfferResult }) {
+  const [productImage, setProductImage] = useState<string | undefined>(result.product.image);
+  const [imgLoading, setImgLoading] = useState(false);
+  const [imgCredit, setImgCredit] = useState<string | undefined>(undefined);
+
+  // Auto-fetch fallback if no product image
+  useEffect(() => {
+    if (result.product.image) {
+      setProductImage(result.product.image);
+      setImgCredit(undefined);
+      return;
+    }
+    let cancelled = false;
+    setImgLoading(true);
+    findFallbackImage({ data: { query: result.product.title } })
+      .then((r) => {
+        if (cancelled) return;
+        if (r.url) {
+          setProductImage(r.url);
+          setImgCredit(r.credit);
+        }
+      })
+      .catch(() => {})
+      .finally(() => !cancelled && setImgLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [result.product.image, result.product.title]);
+
+  function handleUpload(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      setProductImage(String(reader.result));
+      setImgCredit(undefined);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  const productWithImage = { ...result.product, image: productImage };
+
   return (
     <div className="space-y-5">
       <div className="card-glass rounded-2xl p-5">
         <div className="flex items-start gap-4">
-          {result.product.image && (
-            <img
-              src={result.product.image}
-              alt={result.product.title}
-              className="w-24 h-24 rounded-lg object-cover bg-muted flex-shrink-0"
-              onError={(e) => (e.currentTarget.style.display = "none")}
-            />
-          )}
+          <div className="w-24 h-24 rounded-lg bg-muted flex-shrink-0 overflow-hidden flex items-center justify-center">
+            {imgLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            ) : productImage ? (
+              <img
+                src={productImage}
+                alt={result.product.title}
+                className="w-full h-full object-cover"
+                onError={() => setProductImage(undefined)}
+              />
+            ) : (
+              <ImageIcon className="h-6 w-6 text-muted-foreground" />
+            )}
+          </div>
           <div className="flex-1 min-w-0">
             <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
               {result.platformLabel}
@@ -234,7 +284,48 @@ function ResultView({ result }: { result: OfferResult }) {
             {result.product.price && (
               <div className="mt-1 text-primary font-bold">{result.product.price}</div>
             )}
+            {imgCredit && (
+              <div className="mt-1 text-[10px] text-muted-foreground">{imgCredit}</div>
+            )}
           </div>
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          <label className="text-xs flex items-center gap-1 px-3 py-1.5 rounded bg-secondary hover:bg-muted cursor-pointer">
+            <Upload className="h-3.5 w-3.5" />
+            Enviar imagem
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleUpload(f);
+              }}
+            />
+          </label>
+          <button
+            type="button"
+            onClick={() => {
+              setImgLoading(true);
+              findFallbackImage({ data: { query: result.product.title } })
+                .then((r) => {
+                  if (r.url) {
+                    setProductImage(r.url);
+                    setImgCredit(r.credit);
+                    toast.success("Imagem alternativa carregada");
+                  } else {
+                    toast.error("Não achei imagem — envie manualmente");
+                  }
+                })
+                .catch(() => toast.error("Erro na busca"))
+                .finally(() => setImgLoading(false));
+            }}
+            className="text-xs flex items-center gap-1 px-3 py-1.5 rounded bg-secondary hover:bg-muted"
+          >
+            <Search className="h-3.5 w-3.5" />
+            Buscar outra
+          </button>
         </div>
 
         {result.note && (
@@ -292,7 +383,136 @@ function ResultView({ result }: { result: OfferResult }) {
         label="Roteiro Reels/Shorts"
         text={result.captions.script}
       />
-      <OfferCardGenerator result={result} />
+      <OfferCardGenerator result={{ ...result, product: productWithImage }} />
+      <ReelGenerator result={{ ...result, product: productWithImage }} />
+    </div>
+  );
+}
+
+function ReelGenerator({ result }: { result: OfferResult }) {
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [ext, setExt] = useState<"mp4" | "webm">("mp4");
+  const [loading, setLoading] = useState(false);
+  const [badge, setBadge] = useState("OFERTA");
+  const [cta, setCta] = useState("LINK NA BIO 👆");
+
+  async function generate() {
+    setLoading(true);
+    setVideoUrl(null);
+    try {
+      const out = await renderOfferReel({
+        title: result.product.title,
+        price: result.product.price,
+        image: result.product.image,
+        platformLabel: result.platformLabel,
+        badge,
+        cta,
+      });
+      setVideoUrl(out.url);
+      setExt(out.extension);
+      toast.success("Vídeo gerado!");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao gerar vídeo");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function download() {
+    if (!videoUrl) return;
+    const a = document.createElement("a");
+    a.href = videoUrl;
+    a.download = `reel-${Date.now()}.${ext}`;
+    a.click();
+    toast.success("Vídeo baixado");
+  }
+
+  return (
+    <div className="card-glass rounded-2xl p-5">
+      <div className="flex items-center gap-2 font-semibold text-sm mb-3">
+        <Video className="h-4 w-4 text-primary" />
+        Vídeo Reels / Shorts (1080x1920, 8s)
+      </div>
+
+      <div className="grid gap-3 mb-4">
+        <div>
+          <div className="text-xs text-muted-foreground mb-1">Selo</div>
+          <div className="flex flex-wrap gap-2">
+            {["OFERTA", "PROMO", "IMPERDÍVEL", "-30%", "-50%", "OFF"].map((b) => (
+              <button
+                key={b}
+                type="button"
+                onClick={() => setBadge(b)}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition ${
+                  badge === b
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-secondary-foreground hover:bg-muted"
+                }`}
+              >
+                {b}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <div className="text-xs text-muted-foreground mb-1">Chamada final</div>
+          <input
+            value={cta}
+            onChange={(e) => setCta(e.target.value.slice(0, 30))}
+            className="input"
+            placeholder="LINK NA BIO 👆"
+          />
+        </div>
+      </div>
+
+      {videoUrl ? (
+        <div className="space-y-3">
+          <video
+            src={videoUrl}
+            controls
+            playsInline
+            className="w-full max-w-xs mx-auto rounded-lg border border-border bg-black"
+          />
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={download}
+              className="btn-hero px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" /> Baixar .{ext}
+            </button>
+            <button
+              onClick={generate}
+              disabled={loading}
+              className="px-4 py-2 rounded-lg text-sm bg-secondary hover:bg-muted flex items-center gap-2"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              Gerar novamente
+            </button>
+          </div>
+          {ext === "webm" && (
+            <p className="text-xs text-muted-foreground">
+              Seu navegador exportou em .webm. Instagram/Facebook aceitam melhor em .mp4 — abra no
+              Chrome/Safari mais recente ou converta em um app como CapCut antes de postar.
+            </p>
+          )}
+        </div>
+      ) : (
+        <button
+          onClick={generate}
+          disabled={loading}
+          className="btn-hero px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" /> Gravando 8s de vídeo…
+            </>
+          ) : (
+            <>
+              <Video className="h-4 w-4" /> Gerar vídeo Reels
+            </>
+          )}
+        </button>
+      )}
     </div>
   );
 }
