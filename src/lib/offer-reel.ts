@@ -282,8 +282,16 @@ export async function renderOfferReel(input: ReelInput): Promise<ReelOutput> {
         const pulse = 1 + Math.sin(t * Math.PI * 6) * 0.03;
         ctx!.save();
         const px = 80;
-        const py = ty + 40;
-        ctx!.translate(px, py);
+        const py = ty + 30;
+        ctx!.globalAlpha = priceEnter;
+        ctx!.textBaseline = "top";
+        ctx!.font = "700 40px system-ui, sans-serif";
+        ctx!.fillStyle = "rgba(255,255,255,0.7)";
+        ctx!.fillText("POR APENAS", px, py);
+        ctx!.restore();
+
+        ctx!.save();
+        ctx!.translate(px, py + 56);
         ctx!.scale(pulse * priceEnter + (1 - priceEnter) * 0.6, pulse * priceEnter + (1 - priceEnter) * 0.6);
         ctx!.globalAlpha = priceEnter;
         ctx!.font = "900 130px system-ui, sans-serif";
@@ -294,8 +302,17 @@ export async function renderOfferReel(input: ReelInput): Promise<ReelOutput> {
         ctx!.textBaseline = "top";
         ctx!.fillText(input.price, 0, 0);
         ctx!.restore();
+
+        ctx!.save();
+        ctx!.globalAlpha = priceEnter;
+        ctx!.font = "700 42px system-ui, sans-serif";
+        ctx!.fillStyle = "rgba(255,255,255,0.85)";
+        ctx!.textBaseline = "top";
+        ctx!.fillText(`na ${input.platformLabel}`, px, py + 200);
+        ctx!.restore();
         ctx!.globalAlpha = 1;
       }
+
 
       // === CTA at bottom (bouncing) ===
       const ctaEnter = easeOutCubic(Math.min(1, Math.max(0, (t - 0.5) / 0.2)));
