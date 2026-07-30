@@ -15,9 +15,15 @@ import {
   ListPlus,
   CheckCircle2,
   Circle,
+  ImageIcon,
+  Video,
+  Download,
 } from "lucide-react";
 import { analyzeOffer, type OfferResult } from "@/lib/offer.functions";
+import { renderOfferCard } from "@/lib/offer-card";
+import { renderOfferReel } from "@/lib/offer-reel";
 import type { AffiliateIds } from "@/lib/affiliate";
+
 
 export const Route = createFileRoute("/fila")({
   component: FilaPage,
@@ -428,7 +434,9 @@ function QueueRow({
             >
               <ExternalLink className="h-3.5 w-3.5" /> Link
             </a>
+            <MediaButtons result={item.result} />
           </div>
+
 
           {expanded && (
             <div className="mt-3 space-y-2">
@@ -542,4 +550,95 @@ function buildText(base: string, url: string, hashtags: string[]): string {
   if (!hasUrl) parts.push(`\n👉 ${url}`);
   if (hashtags.length) parts.push("\n\n" + hashtags.map((h) => `#${h}`).join(" "));
   return parts.join("");
+}
+
+function MediaButtons({ result }: { result: OfferResult }) {
+  const [busy, setBusy] = useState<null | "card" | "reel">(null);
+
+  function slug() {
+    return result.product.title
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 40) || "oferta";
+  }
+
+  function download(href: string, filename: string) {
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = filename;
+    a.click();
+  }
+
+  async function makeCard() {
+    setBusy("card");
+    try {
+      const dataUrl = await renderOfferCard({
+        title: result.product.title,
+        price: result.product.price,
+        image: result.product.image,
+        platformLabel: result.platformLabel,
+        badge: "OFERTA",
+      });
+      download(dataUrl, `card-${slug()}.png`);
+      toast.success("Card baixado");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao gerar card");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function makeReel() {
+    setBusy("reel");
+    try {
+      const out = await renderOfferReel({
+        title: result.product.title,
+        price: result.product.price,
+        image: result.product.image,
+        platformLabel: result.platformLabel,
+        badge: "OFERTA",
+        cta: "LINK NA BIO 👆",
+      });
+      download(out.url, `reel-${slug()}.${out.extension}`);
+      toast.success(`Vídeo .${out.extension} baixado`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao gerar vídeo");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  return (
+    <>
+      <button
+        onClick={makeCard}
+        disabled={busy !== null}
+        className="text-xs px-3 py-1.5 rounded bg-secondary hover:bg-muted flex items-center gap-1 disabled:opacity-60"
+      >
+        {busy === "card" ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <ImageIcon className="h-3.5 w-3.5" />
+        )}
+        Card
+        {busy !== "card" && <Download className="h-3 w-3 opacity-70" />}
+      </button>
+      <button
+        onClick={makeReel}
+        disabled={busy !== null}
+        className="text-xs px-3 py-1.5 rounded bg-secondary hover:bg-muted flex items-center gap-1 disabled:opacity-60"
+      >
+        {busy === "reel" ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <Video className="h-3.5 w-3.5" />
+        )}
+        {busy === "reel" ? "Gravando 8s…" : "Vídeo"}
+        {busy !== "reel" && <Download className="h-3 w-3 opacity-70" />}
+      </button>
+    </>
+  );
 }
