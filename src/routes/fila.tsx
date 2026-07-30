@@ -428,7 +428,9 @@ function QueueRow({
             >
               <ExternalLink className="h-3.5 w-3.5" /> Link
             </a>
+            <MediaButtons result={item.result} />
           </div>
+
 
           {expanded && (
             <div className="mt-3 space-y-2">
