@@ -15,9 +15,15 @@ import {
   ListPlus,
   CheckCircle2,
   Circle,
+  ImageIcon,
+  Video,
+  Download,
 } from "lucide-react";
 import { analyzeOffer, type OfferResult } from "@/lib/offer.functions";
+import { renderOfferCard } from "@/lib/offer-card";
+import { renderOfferReel } from "@/lib/offer-reel";
 import type { AffiliateIds } from "@/lib/affiliate";
+
 
 export const Route = createFileRoute("/fila")({
   component: FilaPage,
