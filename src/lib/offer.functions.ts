@@ -169,6 +169,7 @@ Gere legendas em português do Brasil no tom ${toneMap[data.tone]} para o produt
 Cada rede social tem regras diferentes — RESPEITE:
 
 - WhatsApp: mensagem CURTA para grupo, direto ao ponto. Estrutura: 1 linha de gancho com emoji + nome do produto em *negrito* + preço + 1 linha de CTA + link. Máx 350 caracteres, no máximo 6 linhas. SEM hashtags. SEM enrolação, SEM descrição longa de benefícios.
+- whatsappVariations: 3 versões DIFERENTES da mensagem de WhatsApp (mesmas regras acima), variando o gancho e o CTA, para o afiliado não repetir texto no grupo. A primeira deve ser igual ao campo "whatsapp".
 - Instagram: legenda de feed curta, 1 gancho + 2-3 linhas de benefício + CTA. Máx 400 caracteres. SEM hashtags no corpo.
 - Facebook: curta e direta, gancho + benefício principal + CTA com link. Máx 400 caracteres. SEM hashtags.
 
