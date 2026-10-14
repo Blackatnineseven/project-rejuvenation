@@ -18,6 +18,7 @@ import {
   ImageIcon,
   Video,
   Download,
+  RefreshCw,
 } from "lucide-react";
 import { analyzeOffer, type OfferResult } from "@/lib/offer.functions";
 import { renderOfferCard } from "@/lib/offer-card";
@@ -341,6 +342,17 @@ function QueueRow({
   onTogglePosted: (k: "postedWhats" | "postedInsta" | "postedFace") => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [variation, setVariation] = useState(0);
+
+  const variations =
+    item.result && item.result.captions.whatsappVariations?.length > 0
+      ? item.result.captions.whatsappVariations
+      : item.result
+        ? [item.result.captions.whatsapp]
+        : [];
+  const whatsText = variations.length
+    ? variations[Math.min(variation, variations.length - 1)]
+    : "";
 
   return (
     <div className="card-glass rounded-2xl p-4">
@@ -394,7 +406,7 @@ function QueueRow({
               icon={<MessageCircle className="h-3.5 w-3.5" />}
               label="WhatsApp"
               url={`https://wa.me/?text=${encodeURIComponent(
-                buildText(item.result.captions.whatsapp, item.result.affiliateUrl, []),
+                buildText(whatsText, item.result.affiliateUrl, []),
               )}`}
               posted={!!item.postedWhats}
               onTogglePosted={() => onTogglePosted("postedWhats")}
@@ -420,6 +432,15 @@ function QueueRow({
               posted={!!item.postedFace}
               onTogglePosted={() => onTogglePosted("postedFace")}
             />
+            {variations.length > 1 && (
+              <button
+                onClick={() => setVariation((v) => (v + 1) % variations.length)}
+                className="text-xs px-3 py-1.5 rounded bg-secondary hover:bg-muted flex items-center gap-1"
+                title="Trocar variação da mensagem de WhatsApp"
+              >
+                <RefreshCw className="h-3.5 w-3.5" /> Variação {Math.min(variation, variations.length - 1) + 1}/{variations.length}
+              </button>
+            )}
             <button
               onClick={() => setExpanded((v) => !v)}
               className="text-xs px-3 py-1.5 rounded bg-secondary hover:bg-muted"
@@ -441,8 +462,8 @@ function QueueRow({
           {expanded && (
             <div className="mt-3 space-y-2">
               <CaptionBlock
-                label="WhatsApp"
-                text={buildText(item.result.captions.whatsapp, item.result.affiliateUrl, [])}
+                label={`WhatsApp${variations.length > 1 ? ` (variação ${Math.min(variation, variations.length - 1) + 1}/${variations.length})` : ""}`}
+                text={buildText(whatsText, item.result.affiliateUrl, [])}
               />
               <CaptionBlock
                 label="Instagram"

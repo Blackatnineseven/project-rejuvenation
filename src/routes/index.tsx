@@ -357,15 +357,7 @@ function ResultView({ result }: { result: OfferResult }) {
         </div>
       </div>
 
-      <CaptionCard
-        icon={<MessageCircle className="h-4 w-4 text-green-400" />}
-        label="WhatsApp"
-        text={buildFullText(result.captions.whatsapp, result.affiliateUrl, [])}
-        shareUrl={`https://wa.me/?text=${encodeURIComponent(
-          buildFullText(result.captions.whatsapp, result.affiliateUrl, []),
-        )}`}
-        shareLabel="Abrir no WhatsApp"
-      />
+      <WhatsAppCard result={result} />
       <CaptionCard
         icon={<Instagram className="h-4 w-4 text-pink-400" />}
         label="Instagram"
@@ -630,6 +622,58 @@ function buildFullText(base: string, url: string, hashtags: string[]): string {
   if (!hasUrl) parts.push(`\n👉 ${url}`);
   if (hashtags.length) parts.push("\n\n" + hashtags.map((h) => `#${h}`).join(" "));
   return parts.join("");
+}
+
+function WhatsAppCard({ result }: { result: OfferResult }) {
+  const variations =
+    result.captions.whatsappVariations?.length > 0
+      ? result.captions.whatsappVariations
+      : [result.captions.whatsapp];
+  const [idx, setIdx] = useState(0);
+  const current = variations[Math.min(idx, variations.length - 1)];
+  const text = buildFullText(current, result.affiliateUrl, []);
+
+  return (
+    <div className="card-glass rounded-2xl p-5">
+      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <div className="flex items-center gap-2 font-semibold text-sm">
+          <MessageCircle className="h-4 w-4 text-green-400" />
+          WhatsApp
+        </div>
+        <div className="flex items-center gap-2">
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(text)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs flex items-center gap-1 px-3 py-1.5 rounded bg-primary text-primary-foreground hover:opacity-90 transition"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            Abrir no WhatsApp
+          </a>
+          <CopyButton value={text} label="WhatsApp" />
+        </div>
+      </div>
+      {variations.length > 1 && (
+        <div className="flex gap-2 mb-3">
+          {variations.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setIdx(i)}
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition ${
+                idx === i
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-secondary-foreground hover:bg-muted"
+              }`}
+            >
+              Variação {i + 1}
+            </button>
+          ))}
+        </div>
+      )}
+      <div className="text-sm whitespace-pre-wrap leading-relaxed">{text}</div>
+    </div>
+  );
 }
 
 function CaptionCard({
