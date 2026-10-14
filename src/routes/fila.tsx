@@ -405,7 +405,7 @@ function QueueRow({
               icon={<MessageCircle className="h-3.5 w-3.5" />}
               label="WhatsApp"
               url={`https://wa.me/?text=${encodeURIComponent(
-                buildText(item.result.captions.whatsapp, item.result.affiliateUrl, []),
+                buildText(whatsText, item.result.affiliateUrl, []),
               )}`}
               posted={!!item.postedWhats}
               onTogglePosted={() => onTogglePosted("postedWhats")}
@@ -452,8 +452,8 @@ function QueueRow({
           {expanded && (
             <div className="mt-3 space-y-2">
               <CaptionBlock
-                label="WhatsApp"
-                text={buildText(item.result.captions.whatsapp, item.result.affiliateUrl, [])}
+                label={`WhatsApp${variations.length > 1 ? ` (variação ${Math.min(variation, variations.length - 1) + 1}/${variations.length})` : ""}`}
+                text={buildText(whatsText, item.result.affiliateUrl, [])}
               />
               <CaptionBlock
                 label="Instagram"
