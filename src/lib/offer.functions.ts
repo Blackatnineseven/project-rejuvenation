@@ -218,6 +218,9 @@ Responda APENAS com JSON válido, sem markdown, sem crases, no formato:
       note: conversion.note,
       captions: {
         whatsapp: parsed.whatsapp,
+        whatsappVariations: Array.isArray(parsed.whatsappVariations)
+          ? parsed.whatsappVariations.filter((v): v is string => typeof v === "string").slice(0, 3)
+          : [parsed.whatsapp],
         instagram: parsed.instagram,
         facebook: parsed.facebook,
         hashtags: parsed.hashtags.map((h) => String(h).replace(/^#/, "")).slice(0, 10),
