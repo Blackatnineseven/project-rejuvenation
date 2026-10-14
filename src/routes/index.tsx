@@ -357,15 +357,7 @@ function ResultView({ result }: { result: OfferResult }) {
         </div>
       </div>
 
-      <CaptionCard
-        icon={<MessageCircle className="h-4 w-4 text-green-400" />}
-        label="WhatsApp"
-        text={buildFullText(result.captions.whatsapp, result.affiliateUrl, [])}
-        shareUrl={`https://wa.me/?text=${encodeURIComponent(
-          buildFullText(result.captions.whatsapp, result.affiliateUrl, []),
-        )}`}
-        shareLabel="Abrir no WhatsApp"
-      />
+      <WhatsAppCard result={result} />
       <CaptionCard
         icon={<Instagram className="h-4 w-4 text-pink-400" />}
         label="Instagram"
