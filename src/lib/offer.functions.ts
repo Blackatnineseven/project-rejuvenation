@@ -31,6 +31,7 @@ const InputSchema = z.object({
 
 export type Captions = {
   whatsapp: string;
+  whatsappVariations: string[];
   instagram: string;
   facebook: string;
   hashtags: string[];
@@ -182,6 +183,7 @@ Link de afiliado: ${conversion.affiliateUrl}
 Responda APENAS com JSON válido, sem markdown, sem crases, no formato:
 {
   "whatsapp": "...",
+  "whatsappVariations": ["...", "...", "..."],
   "instagram": "...",
   "facebook": "...",
   "hashtags": ["até 10 hashtags em minúsculas sem #"],
