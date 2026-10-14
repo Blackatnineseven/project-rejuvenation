@@ -18,6 +18,7 @@ import {
   ImageIcon,
   Video,
   Download,
+  RefreshCw,
 } from "lucide-react";
 import { analyzeOffer, type OfferResult } from "@/lib/offer.functions";
 import { renderOfferCard } from "@/lib/offer-card";
@@ -431,6 +432,15 @@ function QueueRow({
               posted={!!item.postedFace}
               onTogglePosted={() => onTogglePosted("postedFace")}
             />
+            {variations.length > 1 && (
+              <button
+                onClick={() => setVariation((v) => (v + 1) % variations.length)}
+                className="text-xs px-3 py-1.5 rounded bg-secondary hover:bg-muted flex items-center gap-1"
+                title="Trocar variação da mensagem de WhatsApp"
+              >
+                <RefreshCw className="h-3.5 w-3.5" /> Variação {Math.min(variation, variations.length - 1) + 1}/{variations.length}
+              </button>
+            )}
             <button
               onClick={() => setExpanded((v) => !v)}
               className="text-xs px-3 py-1.5 rounded bg-secondary hover:bg-muted"
