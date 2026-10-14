@@ -341,6 +341,17 @@ function QueueRow({
   onTogglePosted: (k: "postedWhats" | "postedInsta" | "postedFace") => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [variation, setVariation] = useState(0);
+
+  const variations =
+    item.result && item.result.captions.whatsappVariations?.length > 0
+      ? item.result.captions.whatsappVariations
+      : item.result
+        ? [item.result.captions.whatsapp]
+        : [];
+  const whatsText = variations.length
+    ? variations[Math.min(variation, variations.length - 1)]
+    : "";
 
   return (
     <div className="card-glass rounded-2xl p-4">
